@@ -8,6 +8,7 @@ import { PackageCheck, Truck, Check, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/toast";
 
 type Pedido = Database["public"]["Tables"]["pedidos"]["Row"];
@@ -23,6 +24,7 @@ export default function PackingPage() {
   const [variantes, setVariantes] = useState<Variante[]>([]);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [despachando, setDespachando] = useState<Set<string>>(new Set());
+  const [trackingPorPedido, setTrackingPorPedido] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -64,8 +66,39 @@ export default function PackingPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#30D158]/20 border-t-[#30D158] rounded-full animate-spin" />
+      <div className="space-y-8 p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#161618]/50 p-4 rounded-xl border border-[#2C2C2E]/50">
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-4 h-4" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+        </div>
+        <Card className="overflow-hidden">
+          <div className="p-6">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-20 mt-2" />
+          </div>
+          <div className="divide-y divide-[#2C2C2E]/30">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="px-6 py-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-20 mt-1" />
+                    <Skeleton className="h-3 w-12 mt-1" />
+                  </div>
+                  <div className="w-20">
+                    <Skeleton className="h-5 w-full" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
     );
   }
@@ -151,18 +184,48 @@ export default function PackingPage() {
                   );
                 })}
               </div>
+              {!pedidoChecked && (
+                <Button
+                  onClick={() => {
+                    const next = { ...checked };
+                    itemsPedido.forEach((i) => { next[i.id] = true; });
+                    setChecked(next);
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="w-full mb-2 px-2 py-1 text-[10px] border-[#30D158]/50 text-[#30D158] hover:bg-[#30D158]/10"
+                >
+                  Marcar todo como verificado
+                </Button>
+              )}
               {pedidoChecked && (
-                <div className="px-6 py-4 bg-[#161618]/30">
+                <div className="px-6 py-4 bg-[#161618]/30 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <label className="text-[10px] text-[#A1A1A6] uppercase tracking-widest">Guía de despacho</label>
+                    <input
+                      type="text"
+                      value={trackingPorPedido[pedido.id] ?? ""}
+                      onChange={(e) => setTrackingPorPedido((prev) => ({ ...prev, [pedido.id]: e.target.value }))}
+                      placeholder="Número de rastreo"
+                      className="flex-1 h-9 rounded-lg border border-[#2C2C2E] bg-[#0A0A0A] px-3 text-sm text-[#FFFFFF] focus:border-[#30D158] focus:outline-none"
+                    />
+                  </div>
                   <Button
                     onClick={async () => {
+                      if (!window.confirm(`¿Confirmar despacho del pedido ${pedido.id.slice(0, 8)}?`)) return;
                       setDespachando((prev) => new Set([...prev, pedido.id]));
-                      await (supabase.from("pedidos").update as any)({ estado: "despachado" }).eq("id", pedido.id);
+                      await (supabase.from("pedidos").update as any)({ estado: "despachado", tracking: trackingPorPedido[pedido.id] || null }).eq("id", pedido.id);
                       setDespachando((prev) => {
                         const next = new Set(prev);
                         next.delete(pedido.id);
                         return next;
                       });
                       setPedidos((prev) => prev.filter((p) => p.id !== pedido.id));
+                      setTrackingPorPedido((prev) => {
+                        const next = { ...prev };
+                        delete next[pedido.id];
+                        return next;
+                      });
                       toast({ title: "Pedido despachado", description: `El pedido ${pedido.id.slice(0, 8)} ha sido despachado`, variant: "success" });
                     }}
                     disabled={isDespachando}

@@ -1,32 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Box, Factory, ShoppingCart, PackageCheck, TrendingUp, Search } from "lucide-react";
 
 const NAV = [
-  { href: "/inventario", label: "Inventario", icon: "Box" },
-  { href: "/ordenes-fabrica", label: "Órdenes de Fábrica", icon: "Factory" },
-  { href: "/pedidos", label: "Pedidos", icon: "ShoppingCart" },
-  { href: "/packing", label: "Packing", icon: "PackageCheck" },
-  { href: "/rentabilidad", label: "Rentabilidad", icon: "TrendingUp" },
+  { href: "/inventario", label: "Inventario", icon: Box },
+  { href: "/ordenes-fabrica", label: "Órdenes de Fábrica", icon: Factory },
+  { href: "/pedidos", label: "Pedidos", icon: ShoppingCart },
+  { href: "/packing", label: "Packing", icon: PackageCheck },
+  { href: "/rentabilidad", label: "Rentabilidad", icon: TrendingUp },
 ];
-
-const ICONS: Record<string, React.ElementType> = {
-  Box: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
-  Factory: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M10.5 21.5V18m0-6l3-3m-3 3h3m-3 0v3m0 0v3m0-3h3m3 0V13.5M10.5 21.5H18m0 0h2.25m-2.25 0c0 0.621-0 0.932 0 1.124a1.5 1.5 0 01-1.5 1.5h-3a1.5 1.5 0 01-1.5-1.5c0-0.192 0-0.503 0-1.124M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-  ShoppingCart: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>,
-  PackageCheck: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 21l4-9 4 9M3 4h18M3 4l9 14" /></svg>,
-  TrendingUp: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>,
-  Search: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>,
-};
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [mobileMenu, setMobileMenu] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSidebarSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const input = e.currentTarget.elements.namedItem("q") as HTMLInputElement | null;
+    const q = input?.value.trim();
+    if (!q) return;
+    router.push(`/inventario?search=${encodeURIComponent(q)}`);
+    setMobileMenu(false);
+  };
 
   return (
     <div className={`fixed left-0 top-0 h-screen z-30 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"} sm:translate-x-0 sm:relative sm:transform-none sm:bg-transparent sm:shadow-none`}>
@@ -51,16 +52,17 @@ export default function Sidebar() {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-          <div className="flex items-center gap-2 px-3 py-2 mb-6">
+          <form onSubmit={handleSidebarSearch} className="flex items-center gap-2 px-3 py-2 mb-6">
             <Search className="w-4 h-4 text-[#A1A1A6]" />
             <input
+              name="q"
               type="text"
               placeholder="Buscar SKU, pedido..."
               className="flex-1 bg-[#161618] border border-[#2C2C2E] rounded-lg px-3 py-1.5 text-xs text-[#FFFFFF] focus:border-[#30D158] focus:outline-none focus:ring-1 focus:ring-[#30D158]"
             />
-          </div>
+          </form>
           {NAV.map((item) => {
-            const Icon = ICONS[item.icon];
+            const Icon = item.icon;
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link

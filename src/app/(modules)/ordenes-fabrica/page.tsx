@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { createClient, isBrowser } from "@/lib/supabase/client";
 import type { Database } from "@/types/database";
@@ -9,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/toast";
 
 type Orden = Database["public"]["Tables"]["ordenes_fabrica"]["Row"];
@@ -79,8 +82,84 @@ export default function OrdenesFabricaPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#30D158]/20 border-t-[#30D158] rounded-full animate-spin" />
+      <div className="space-y-8 p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#161618]/50 p-4 rounded-xl border border-[#2C2C2E]/50">
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-4 h-4" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} padding="sm" className="border border-[#2C2C2E]/30">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="w-12 h-10" />
+              </div>
+            </Card>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Card className="overflow-hidden">
+              <div className="p-6">
+                <h2 className="text-lg font-bold text-[#FFFFFF] mb-6">
+                  <Skeleton className="h-5 w-24" />
+                </h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <tbody>
+                      {Array.from({ length: 3 }).map((_, row) => (
+                        <tr key={row} className="border-b border-[#2C2C2E]/30">
+                          {Array.from({ length: 9 }).map((_, col) => (
+                            <td key={col} className="px-4 py-3 text-xs text-[#FFFFFF]">
+                              <Skeleton className="h-4 w-20" />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </Card>
+          </div>
+          <div className="space-y-6">
+            <Card className="overflow-hidden">
+              <div className="p-6">
+                <h2 className="text-lg font-bold text-[#FFFFFF] mb-6">
+                  <Skeleton className="h-5 w-32" />
+                </h2>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-[#161618] border border-[#2C2C2E]/50">
+                      <Skeleton className="w-8 h-8" />
+                      <div className="flex-1">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-full mt-1" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (ordenes.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <Factory className="w-16 h-16 text-[#A1A1A6] mb-4" />
+        <h2 className="text-lg font-bold text-[#FFFFFF] mb-2">Sin órdenes de fábrica</h2>
+        <p className="text-[#A1A1A6] text-sm mb-6 max-w-xs">
+          Crea tu primera orden de fabricación para comenzar el ciclo de producción.
+        </p>
+        <Button variant="success" asChild>
+          <Link href="/ordenes-fabrica">Crear orden</Link>
+        </Button>
       </div>
     );
   }
@@ -137,6 +216,8 @@ export default function OrdenesFabricaPage() {
                   <tbody>
                     {ordenes.map((o) => {
                       const est = ESTADOS.find((e) => e.key === o.estado)!;
+                      const idx = ESTADOS.findIndex((e) => e.key === o.estado);
+                      const siguiente = ESTADOS[idx + 1];
                       const landed = calcularLanded(o);
                       return (
                         <tr key={o.id} className="border-b border-[#2C2C2E]/30 hover:bg-[#161618]/30 transition-colors">
@@ -150,6 +231,30 @@ export default function OrdenesFabricaPage() {
                           <td className="px-4 py-3 text-xs text-right text-[#FFFFFF]">{o.seguros?.toFixed(2) ?? "—"}</td>
                           <td className="px-4 py-3 text-xs text-right text-[#FFFFFF]">{o.unidades_aprobadas_recibidas ?? "—"}</td>
                           <td className="px-4 py-3 text-xs font-mono text-right text-[#FFFFFF]">{landed.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-right">
+                            {siguiente ? (
+                              <Button
+                                onClick={async () => {
+                                  if (!window.confirm(`¿Avanzar orden ${o.id.slice(0, 8)} a "${siguiente.label}"?`)) return;
+                                  const { error } = await (supabase.from("ordenes_fabrica").update as any)({ estado: siguiente.key }).eq("id", o.id);
+                                  if (!error) {
+                                    toast({ title: "Estado avanzado", description: `Orden ${o.id.slice(0, 8)} ahora es ${siguiente.label}`, variant: "success" });
+                                  } else {
+                                    toast({ title: "Error", description: error.message, variant: "critical" });
+                                  }
+                                }}
+                                variant="outline"
+                                size="sm"
+                                className="w-full px-2 py-1 text-[10px]"
+                              >
+                                Siguiente: {siguiente.label}
+                              </Button>
+                            ) : (
+                              <Button variant="ghost" size="sm" disabled className="w-full px-2 py-1 text-[10px] opacity-50">
+                                Completado
+                              </Button>
+                            )}
+                          </td>
                         </tr>
                       );
                     })}
@@ -236,6 +341,16 @@ export default function OrdenesFabricaPage() {
               </div>
               <Button
                 onClick={async () => {
+                  const costo = Number(nuevaOrden.costo_fabrica_total);
+                  const flete = Number(nuevaOrden.flete);
+                  const aranceles = Number(nuevaOrden.aranceles);
+                  const seguros = Number(nuevaOrden.seguros);
+                  const unidades = Number(nuevaOrden.unidades_aprobadas_recibidas);
+                  if (!costo || !flete || !aranceles || !seguros || !unidades) {
+                    toast({ title: "Campos requeridos", description: "Completa todos los campos de costo landed", variant: "warning" });
+                    return;
+                  }
+                  if (!window.confirm("¿Confirmar creación de la orden de fábrica?")) return;
                   const { error } = await (supabase.from("ordenes_fabrica").insert as any)({
                     estado: "borrador",
                     costo_fabrica_total: Number(nuevaOrden.costo_fabrica_total) || null,
@@ -249,7 +364,7 @@ export default function OrdenesFabricaPage() {
                     toast({ title: "Orden creada", description: "La orden se agregó como borrador", variant: "success" });
                   }
                 }}
-                className="w-full bg-[#30D158] text-[#0A0A0A] font-semibold py-3 rounded-xl"
+                className="w-full bg-[#30D158] text-[#0A0A0A] font-semibold py-3 rounded-xl disabled:opacity-50 disabled:pointer-events-none"
               >
                 Crear orden
               </Button>
