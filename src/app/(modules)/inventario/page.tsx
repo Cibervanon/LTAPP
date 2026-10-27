@@ -19,10 +19,7 @@ export default function InventarioPage() {
   const supabase = useMemo(() => (isBrowser() ? createClient() : null), []);
   const [variantes, setVariantes] = useState<Variante[]>([]);
   const [loading, setLoading] = useState(true);
-  const searchQuery = (() => {
-    if (typeof window === "undefined") return "";
-    return new URLSearchParams(window.location.search).get("search") ?? "";
-  })();
+  const [search, setSearch] = useState("");
   const [filterStock, setFilterStock] = useState("todos");
   const { toast } = useToast();
 
@@ -78,16 +75,16 @@ export default function InventarioPage() {
 
   const filtered = useMemo(() => variantes.filter((v) => {
     const matchesSearch =
-      v.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.talla.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.color.toLowerCase().includes(searchQuery.toLowerCase());
+      v.sku.toLowerCase().includes(search.toLowerCase()) ||
+      v.talla.toLowerCase().includes(search.toLowerCase()) ||
+      v.color.toLowerCase().includes(search.toLowerCase());
     const matchesStock =
       filterStock === "todos" ||
       (filterStock === "bajo" && v.stock_disponible <= v.stock_minimo && v.stock_disponible > 0) ||
       (filterStock === "critico" && v.stock_disponible === 0) ||
       (filterStock === "ok" && v.stock_disponible > v.stock_minimo);
     return matchesSearch && matchesStock;
-  }), [variantes, searchQuery, filterStock]);
+  }), [variantes, search, filterStock]);
 
   useEffect(() => {
     const load = async () => {
@@ -130,6 +127,12 @@ export default function InventarioPage() {
       supabase.removeChannel(channel);
     };
   }, [supabase, toast]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    setSearch(params.get("search") ?? "");
+  }, []);
 
   if (loading) {
     return (
