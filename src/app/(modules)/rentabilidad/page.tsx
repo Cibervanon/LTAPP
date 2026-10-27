@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient, isBrowser } from "@/lib/supabase/client";
 import type { Database } from "@/types/database";
 import { motion } from "framer-motion";
