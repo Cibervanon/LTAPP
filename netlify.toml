@@ -1,0 +1,20 @@
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+  X-Content-Type-Options = "nosniff"
+  X-Frame-Options = "DENY"
+  Referrer-Policy = "strict-origin-when-cross-origin"
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+  function_directory = "netlify/functions"
+
+[build.environment]
+  NEXT_PUBLIC_SUPABASE_URL = "tu_url_de_supabase"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "tu_anon_key_de_supabase"

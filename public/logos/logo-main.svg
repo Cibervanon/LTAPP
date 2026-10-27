@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 220" fill="none">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E5E5E5"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="220" fill="transparent"/>
+  <text x="40" y="150" font-family="Inter, Helvetica, Arial, sans-serif" font-size="86" font-weight="900" fill="url(#grad)" letter-spacing="-4">LIFTING</text>
+  <text x="40" y="210" font-family="Inter, Helvetica, Arial, sans-serif" font-size="86" font-weight="900" fill="url(#grad)" letter-spacing="-4">TRUST</text>
+  <path d="M140 128 L164 128 L164 220 L184 220 L184 128 L208 128" fill="url(#grad)"/>
+  <path d="M164 128 L164 110 Q174 100 184 100 Q194 100 204 110 L204 128" fill="url(#grad)"/>
+</svg>
