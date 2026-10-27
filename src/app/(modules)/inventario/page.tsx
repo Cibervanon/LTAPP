@@ -1,9 +1,7 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useMemo, useState } from "react";
+import { createClient, isBrowser } from "@/lib/supabase/client";
 import type { Database } from "@/types/database";
 import { AnimatePresence } from "framer-motion";
 import { Box, AlertTriangle, Plus } from "lucide-react";
@@ -17,14 +15,8 @@ import { cn } from "@/lib/utils";
 type Variante = Database["public"]["Tables"]["variantes"]["Row"];
 
 export default function InventarioPage() {
-  const [supabase, setSupabase] = useState<any>(null);
+  const supabase = useMemo(() => (isBrowser() ? createClient() : null), []);
   const [variantes, setVariantes] = useState<Variante[]>([]);
-
-  useEffect(() => {
-    setSupabase(createClient());
-  }, []);
-
-  if (!supabase) return null;
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStock, setFilterStock] = useState("todos");

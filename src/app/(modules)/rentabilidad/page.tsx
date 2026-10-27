@@ -1,9 +1,7 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useMemo, useState } from "react";
+import { createClient, isBrowser } from "@/lib/supabase/client";
 import type { Database } from "@/types/database";
 import { motion } from "framer-motion";
 import { TrendingUp, AlertTriangle, DollarSign, Box } from "lucide-react";
@@ -16,14 +14,8 @@ type Pedido = Database["public"]["Tables"]["pedidos"]["Row"];
 type DetallePedido = Database["public"]["Tables"]["detalle_pedidos"]["Row"];
 
 export default function RentabilidadPage() {
-  const [supabase, setSupabase] = useState<any>(null);
+  const supabase = useMemo(() => (isBrowser() ? createClient() : null), []);
   const [variantes, setVariantes] = useState<Variante[]>([]);
-
-  useEffect(() => {
-    setSupabase(createClient());
-  }, []);
-
-  if (!supabase) return null;
   const [ordenes, setOrdenes] = useState<Orden[]>([]);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [detallesPedido, setDetallesPedido] = useState<DetallePedido[]>([]);

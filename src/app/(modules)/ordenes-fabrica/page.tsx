@@ -1,9 +1,7 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useMemo, useState } from "react";
+import { createClient, isBrowser } from "@/lib/supabase/client";
 import type { Database } from "@/types/database";
 import { motion, AnimatePresence } from "framer-motion";
 import { Factory, AlertTriangle, Plus, Calculator, Truck, Clock } from "lucide-react";
@@ -25,14 +23,8 @@ const ESTADOS: { key: Orden["estado"]; label: string; color: string }[] = [
 ];
 
 export default function OrdenesFabricaPage() {
-  const [supabase, setSupabase] = useState<any>(null);
+  const supabase = useMemo(() => (isBrowser() ? createClient() : null), []);
   const [ordenes, setOrdenes] = useState<Orden[]>([]);
-
-  useEffect(() => {
-    setSupabase(createClient());
-  }, []);
-
-  if (!supabase) return null;
   const [loading, setLoading] = useState(true);
   const [nuevaOrden, setNuevaOrden] = useState<Record<string, string>>({
     costo_fabrica_total: "",

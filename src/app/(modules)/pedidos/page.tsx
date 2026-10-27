@@ -1,9 +1,7 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useMemo, useState } from "react";
+import { createClient, isBrowser } from "@/lib/supabase/client";
 import type { Database } from "@/types/database";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Truck, AlertTriangle, Plus } from "lucide-react";
@@ -22,14 +20,8 @@ const ESTADOS: { key: string; label: string; color: string }[] = [
 ];
 
 export default function PedidosPage() {
-  const [supabase, setSupabase] = useState<any>(null);
+  const supabase = useMemo(() => (isBrowser() ? createClient() : null), []);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
-
-  useEffect(() => {
-    setSupabase(createClient());
-  }, []);
-
-  if (!supabase) return null;
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 

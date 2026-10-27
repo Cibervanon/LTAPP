@@ -1,9 +1,7 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useMemo, useState } from "react";
+import { createClient, isBrowser } from "@/lib/supabase/client";
 import type { Database } from "@/types/database";
 import { motion, AnimatePresence } from "framer-motion";
 import { PackageCheck, Truck, Check, AlertTriangle } from "lucide-react";
@@ -19,14 +17,8 @@ type Variante = Database["public"]["Tables"]["variantes"]["Row"];
 type Item = DetallePedido & { variante: Variante | null };
 
 export default function PackingPage() {
-  const [supabase, setSupabase] = useState<any>(null);
+  const supabase = useMemo(() => (isBrowser() ? createClient() : null), []);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
-
-  useEffect(() => {
-    setSupabase(createClient());
-  }, []);
-
-  if (!supabase) return null;
   const [items, setItems] = useState<Item[]>([]);
   const [variantes, setVariantes] = useState<Variante[]>([]);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
