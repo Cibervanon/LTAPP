@@ -21,7 +21,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (session?.user) {
-      router.push("/(modules)/inventario");
+      router.push("/inventario");
     }
   }, [session, router]);
 

@@ -9,7 +9,7 @@ export default async function LoginLayout({
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (session) redirect("/(modules)/inventario");
+  if (session) redirect("/inventario");
 
   return <>{children}</>;
 }

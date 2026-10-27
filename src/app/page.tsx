@@ -6,6 +6,6 @@ export default async function Home() {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (session) redirect("/(modules)/inventario");
+  if (session) redirect("/inventario");
   redirect("/login");
 }

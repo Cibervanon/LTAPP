@@ -15,6 +15,4 @@
   publish = ".next"
   function_directory = "netlify/functions"
 
-[build.environment]
-  NEXT_PUBLIC_SUPABASE_URL = "tu_url_de_supabase"
-  NEXT_PUBLIC_SUPABASE_ANON_KEY = "tu_anon_key_de_supabase"
+
