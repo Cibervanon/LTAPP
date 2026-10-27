@@ -1,6 +1,8 @@
 import { createBrowserClient, isBrowser } from "@supabase/ssr";
 import type { Database } from "@/types/database";
 
+export { isBrowser };
+
 export function createClient() {
   if (!isBrowser()) {
     throw new Error("createClient is for browser use only");
