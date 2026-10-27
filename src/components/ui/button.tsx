@@ -15,16 +15,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
 
     const variants = {
-      default: "bg-primary-text text-[#121212] hover:bg-[#e0e0e0]",
-      success: "bg-success text-[#121212] hover:bg-[#2eb84d]",
-      warning: "bg-warning text-[#121212] hover:bg-[#e08f09]",
-      critical: "bg-critical text-[#121212] hover:bg-[#d63a30]",
-      ghost: "bg-transparent text-primary-text hover:bg-[#2A2A2A]",
-      outline: "border border-border bg-transparent text-primary-text hover:bg-[#2A2A2A]",
+      default: "bg-[#161618] border border-[#2C2C2E] text-[#FFFFFF] hover:bg-[#2C2C2E]",
+      success: "bg-[#30D158] text-[#0A0A0A] hover:bg-[#2eb84d]",
+      warning: "bg-[#FF9F0A] text-[#0A0A0A] hover:bg-[#e08f09]",
+      critical: "bg-[#FF453A] text-[#FFFFFF] hover:bg-[#d63a30]",
+      ghost: "bg-transparent text-[#FFFFFF] hover:bg-[#161618]",
+      outline: "border border-[#2C2C2E] bg-transparent text-[#FFFFFF] hover:bg-[#161618]",
     };
 
     const sizes = {
-      sm: "px-3 py-1.5 text-sm",
+      sm: "px-3 py-1.5 text-xs",
       md: "px-4 py-2 text-sm",
       lg: "px-6 py-3 text-base",
     };
@@ -32,7 +32,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         className={cn(
-          "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:pointer-events-none",
+          "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg-primary disabled:opacity-50 disabled:pointer-events-none",
           variants[variant],
           sizes[size],
           className

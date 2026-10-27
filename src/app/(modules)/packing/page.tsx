@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/types/database";
 import { motion, AnimatePresence } from "framer-motion";
-import { PackageCheck, Truck, Check, AlertTriangle, Loader2 } from "lucide-react";
+import { PackageCheck, Truck, Check, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,8 +19,14 @@ type Variante = Database["public"]["Tables"]["variantes"]["Row"];
 type Item = DetallePedido & { variante: Variante | null };
 
 export default function PackingPage() {
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<any>(null);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
+
+  useEffect(() => {
+    setSupabase(createClient());
+  }, []);
+
+  if (!supabase) return null;
   const [items, setItems] = useState<Item[]>([]);
   const [variantes, setVariantes] = useState<Variante[]>([]);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -65,7 +73,7 @@ export default function PackingPage() {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-10 h-10 border-4 border-success/20 border-t-success rounded-full" />
+        <div className="w-10 h-10 border-4 border-[#30D158]/20 border-t-[#30D158] rounded-full animate-spin" />
       </div>
     );
   }
@@ -81,16 +89,16 @@ export default function PackingPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <PackageCheck className="w-6 h-6 text-success" />
-            <h1 className="text-2xl font-bold text-primary-text tracking-tighter uppercase">Packing Digital</h1>
+            <PackageCheck className="w-5 h-5 text-[#30D158]" />
+            <h1 className="text-2xl font-bold text-[#FFFFFF] tracking-tighter uppercase">Packing Digital</h1>
           </div>
-          <p className="text-secondary-text text-sm">
-            Verifica físicamente cada item antes de despachar. Marca los items verificados.
+          <p className="text-[#A1A1A6] text-sm">
+            Verifica físicamente cada item antes de despachar.
           </p>
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+      <Card className="overflow-hidden">
         {pedidos.map((pedido) => {
           const itemsPedido = items.filter((i) => i.pedido_id === pedido.id);
           const pedidoChecked = itemsPedido.length > 0 && itemsPedido.every((i) => checked[i.id]);
@@ -102,22 +110,22 @@ export default function PackingPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="border-b border-border/50 last:border-0"
+              className="border-b border-[#2C2C2E]/30 last:border-0"
             >
-              <div className="px-6 py-4 flex items-center justify-between bg-[#1A1A1A]/30 cursor-pointer">
+              <div className="px-6 py-4 flex items-center justify-between bg-[#161618]/30">
                 <div>
-                  <p className="text-sm font-semibold text-primary-text">
+                  <p className="text-sm font-semibold text-[#FFFFFF]">
                     Pedido {pedido.id.slice(0, 8)} · {pedido.canal ?? "—"}
                   </p>
-                  <p className="text-xs text-secondary-text">Cliente: {pedido.cliente_id ?? "—"}</p>
+                  <p className="text-[10px] text-[#A1A1A6]">Cliente: {pedido.cliente_id ?? "—"}</p>
                 </div>
                 <div className="text-right">
                   <Badge variant={pedidoChecked ? "success" : "warning"}>
-                    {pedidoChecked ? "Lista para despachar" : "Pendiente de verificación"}
+                    {pedidoChecked ? "Listo para despachar" : "Pendiente de verificación"}
                   </Badge>
                 </div>
               </div>
-              <div className="px-6 py-4 divide-y divide-border/50">
+              <div className="px-6 py-4 divide-y divide-[#2C2C2E]/30">
                 {itemsPedido.map((item) => {
                   const isChecked = checked[item.id] ?? false;
                   return (
@@ -128,22 +136,22 @@ export default function PackingPage() {
                       className="flex items-center justify-between gap-4 py-3 group"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-primary-text truncate">
+                        <p className="text-sm font-medium text-[#FFFFFF] truncate">
                           {item.variante?.sku ?? "SKU desconocido"}
                         </p>
-                        <p className="text-xs text-secondary-text truncate">
+                        <p className="text-[10px] text-[#A1A1A6] truncate">
                           {item.variante?.talla ?? "—"} · {item.variante?.color ?? "—"}
                         </p>
-                        <p className="text-xs text-secondary-text">Cant: {item.cantidad}</p>
+                        <p className="text-[10px] text-[#A1A1A6]">Cant: {item.cantidad}</p>
                       </div>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => setChecked((prev) => ({ ...prev, [item.id]: !isChecked }))}
-                          className="w-5 h-5 rounded border-border text-success accent-success bg-[#252525] focus:ring-0 checked:bg-success checked:border-success transition-all"
+                          className="w-5 h-5 rounded border-[#2C2C2E] text-[#30D158] accent-[#30D158] bg-[#161618] focus:ring-0 checked:bg-[#30D158] checked:border-[#30D158] transition-all"
                         />
-                        <span className={`text-xs font-medium transition-colors ${isChecked ? "text-success" : "text-secondary-text"}`}>
+                        <span className={`text-[10px] font-medium transition-colors ${isChecked ? "text-[#30D158]" : "text-[#A1A1A6]"}`}>
                           {isChecked ? "Verificado" : "Pendiente"}
                         </span>
                       </label>
@@ -152,7 +160,7 @@ export default function PackingPage() {
                 })}
               </div>
               {pedidoChecked && (
-                <div className="px-6 py-4 bg-[#1A1A1A]/30">
+                <div className="px-6 py-4 bg-[#161618]/30">
                   <Button
                     onClick={async () => {
                       setDespachando((prev) => new Set([...prev, pedido.id]));
@@ -166,10 +174,10 @@ export default function PackingPage() {
                       toast({ title: "Pedido despachado", description: `El pedido ${pedido.id.slice(0, 8)} ha sido despachado`, variant: "success" });
                     }}
                     disabled={isDespachando}
-                    className="w-full bg-success text-[#121212] font-semibold py-3 rounded-xl disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="w-full bg-[#30D158] text-[#0A0A0A] font-semibold py-3 rounded-xl disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {isDespachando ? (
-                      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         <Truck className="w-4 h-4" />
@@ -182,24 +190,22 @@ export default function PackingPage() {
             </motion.div>
           );
         })}
-      </div>
+      </Card>
     </div>
   );
 }
 
 function EmptyStatePacking() {
   return (
-    <div className="bg-card border border-border rounded-xl p-12 text-center shadow-sm">
-      <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
-        <Truck className="w-8 h-8 text-success" />
+    <Card className="p-12 text-center border-[#2C2C2E]/30">
+      <div className="w-16 h-16 rounded-full bg-[#30D158]/10 flex items-center justify-center mx-auto mb-4">
+        <Truck className="w-8 h-8 text-[#30D158]" />
       </div>
-      <h3 className="text-lg font-bold text-primary-text mb-2">Sin pedidos pendientes</h3>
-      <p className="text-secondary-text text-sm mb-6">
+      <h3 className="text-lg font-bold text-[#FFFFFF] mb-2">Sin pedidos pendientes</h3>
+      <p className="text-[#A1A1A6] text-sm mb-6">
         Todos los pedidos han sido verificados y despachados.
       </p>
-      <div className="flex justify-center">
-        <Badge variant="success">✓ Todo al día</Badge>
-      </div>
-    </div>
+      <Badge variant="success">✓ Todo al día</Badge>
+    </Card>
   );
 }

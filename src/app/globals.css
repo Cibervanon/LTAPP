@@ -2,19 +2,19 @@
 
 @layer base {
   :root {
-    --background: #121212;
-    --foreground: #FFFFFF;
+    --bg-primary: #0A0A0A;
+    --surface-raised: #161618;
+    --border-hairline: #2C2C2E;
+    --text-primary: #FFFFFF;
+    --text-secondary: #A1A1A6;
+    --status-success: #30D158;
+    --status-warning: #FF9F0A;
+    --status-danger: #FF453A;
   }
 
   body {
-    background: #121212;
+    background: #0A0A0A;
     color: #FFFFFF;
     font-family: Inter, system-ui, sans-serif;
-  }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
   }
 }

@@ -13,21 +13,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="space-y-1">
         {label && (
-          <label className="block text-xs font-medium text-secondary-text uppercase tracking-wider">
+          <label className="block text-[10px] font-medium text-[#A1A1A6] uppercase tracking-widest">
             {label}
           </label>
         )}
         <input
           type={type}
           className={cn(
-            "flex h-10 w-full rounded-lg border border-[#3A3A3C] bg-[#252525] px-3 py-2 text-sm text-primary-text placeholder:text-[#5A5A5A] focus:outline-none focus:border-success focus:ring-1 focus:ring-success transition-colors",
-            error && "border-critical focus:border-critical focus:ring-critical",
+            "flex h-10 w-full rounded-lg border border-[#2C2C2E] bg-[#161618] px-3 py-2 text-sm text-[#FFFFFF] placeholder:text-[#5A5A5A] focus:outline-none focus:border-[#30D158] focus:ring-1 focus:ring-[#30D158] transition-colors",
+            error && "border-[#FF453A] focus:border-[#FF453A] focus:ring-[#FF453A]",
             className
           )}
           ref={ref}
           {...props}
         />
-        {error && <p className="text-xs text-critical">{error}</p>}
+        {error && <p className="text-[10px] text-[#FF453A]">{error}</p>}
       </div>
     );
   }

@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/types/database";
@@ -15,8 +17,14 @@ import { cn } from "@/lib/utils";
 type Variante = Database["public"]["Tables"]["variantes"]["Row"];
 
 export default function InventarioPage() {
-  const [supabase] = useState(() => createClient());
+  const [supabase, setSupabase] = useState<any>(null);
   const [variantes, setVariantes] = useState<Variante[]>([]);
+
+  useEffect(() => {
+    setSupabase(createClient());
+  }, []);
+
+  if (!supabase) return null;
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStock, setFilterStock] = useState("todos");
@@ -74,7 +82,7 @@ export default function InventarioPage() {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <div className="w-12 h-12 border-4 border-success/20 border-t-success rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#30D158]/20 border-t-[#30D158] rounded-full animate-spin" />
       </div>
     );
   }
@@ -87,27 +95,20 @@ export default function InventarioPage() {
   }
 
   const statusColor = (v: Variante) => {
-    if (v.stock_disponible === 0) return "bg-critical/10 text-critical border border-critical/20";
-    if (v.stock_disponible <= v.stock_minimo) return "bg-warning/10 text-warning border border-warning/20";
-    return "bg-success/10 text-success border border-success/20";
-  };
-
-  const statusLabel = (v: Variante) => {
-    if (v.stock_disponible === 0) return "Sin stock";
-    if (v.stock_disponible <= v.stock_minimo) return "Bajo mínimo";
-    return "Disponible";
+    if (v.stock_disponible === 0) return "bg-[#FF453A]/15 text-[#FF453A] border border-[#FF453A]/30";
+    if (v.stock_disponible <= v.stock_minimo) return "bg-[#FF9F0A]/15 text-[#FF9F0A] border border-[#FF9F0A]/30";
+    return "bg-[#30D158]/15 text-[#30D158] border border-[#30D158]/30";
   };
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Box className="w-6 h-6 text-success" />
-            <h1 className="text-2xl font-bold text-primary-text tracking-tighter uppercase">Matriz de Inventario</h1>
+            <Box className="w-5 h-5 text-[#30D158]" />
+            <h1 className="text-2xl font-bold text-[#FFFFFF] tracking-tighter uppercase">Matriz de Inventario</h1>
           </div>
-          <p className="text-secondary-text text-sm">
+          <p className="text-[#A1A1A6] text-sm">
             Control de stock por SKU, talla y color. Actualizado en tiempo real.
           </p>
         </div>
@@ -117,7 +118,6 @@ export default function InventarioPage() {
         </Button>
       </div>
 
-      {/* Stats cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard title="Stock Disponible" value={stats.total} icon={Box} color="success" />
         <StatCard title="Reservado" value={stats.reservado} icon={AlertTriangle} color="warning" />
@@ -125,19 +125,18 @@ export default function InventarioPage() {
         <StatCard title="Sin Stock" value={stats.sinStock} icon={AlertTriangle} color="critical" />
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-2">
         <input
           type="text"
           placeholder="Buscar SKU, talla, color..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-64 bg-[#1A1A1A] border border-[#3A3A3C] rounded-lg px-4 py-2 pl-10 text-sm text-primary-text focus:border-success focus:outline-none focus:ring-1 focus:ring-success relative"
+          className="w-full md:w-64 bg-[#161618] border border-[#2C2C2E] rounded-lg px-4 py-2 pl-10 text-sm text-[#FFFFFF] focus:border-[#30D158] focus:outline-none focus:ring-1 focus:ring-[#30D158] relative"
         />
         <select
           value={filterStock}
           onChange={(e) => setFilterStock(e.target.value)}
-          className="bg-[#1A1A1A] border border-[#3A3A3C] rounded-lg px-3 py-2 text-sm text-primary-text focus:border-success focus:outline-none focus:ring-1 focus:ring-success"
+          className="bg-[#161618] border border-[#2C2C2E] rounded-lg px-3 py-2 text-sm text-[#FFFFFF] focus:border-[#30D158] focus:outline-none focus:ring-1 focus:ring-[#30D158]"
         >
           <option value="todos">Todos</option>
           <option value="ok">Disponible</option>
@@ -146,24 +145,23 @@ export default function InventarioPage() {
         </select>
       </div>
 
-      {/* Matrix */}
       {filtered.length === 0 ? (
         <EmptyState
-          title="No hay coincidencias"
-          description="Prueba con otro término de búsqueda o filtro."
+          title="Sin resultados"
+          description="Prueba con otro término o filtro."
           icon={<AlertTriangle className="w-8 h-8" />}
         />
       ) : (
-        <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+        <Card className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-[#1A1A1A]/50">
-                  <th className="px-4 py-3 text-xs font-semibold text-secondary-text uppercase tracking-wider">
+                <tr className="border-b border-[#2C2C2E]/50 bg-[#161618]/30">
+                  <th className="px-4 py-3 text-[10px] font-semibold text-[#A1A1A6] uppercase tracking-widest">
                     SKU / Talla
                   </th>
                   {colores.map((color) => (
-                    <th key={color} className="px-4 py-3 text-xs font-semibold text-secondary-text uppercase tracking-wider text-center">
+                    <th key={color} className="px-4 py-3 text-[10px] font-semibold text-[#A1A1A6] uppercase tracking-widest text-center">
                       {color}
                     </th>
                   ))}
@@ -171,15 +169,15 @@ export default function InventarioPage() {
               </thead>
               <tbody>
                 {tallas.map((talla) => (
-                  <tr key={talla} className="border-b border-border/50 hover:bg-[#1A1A1A]/30 transition-colors group">
-                    <th className="px-4 py-3 text-sm text-primary-text font-medium">{talla}</th>
+                  <tr key={talla} className="border-b border-[#2C2C2E]/30 hover:bg-[#161618]/30 transition-colors">
+                    <th className="px-4 py-3 text-sm text-[#FFFFFF] font-medium">{talla}</th>
                     {colores.map((color) => {
                       const v = skuPorTallaYColor[`${talla}|${color}`];
                       return (
                         <td key={color} className="px-4 py-3 text-center">
                           {v ? (
                             <div className="flex flex-col items-center gap-2 group cursor-default">
-                              <span className="text-xs font-mono text-secondary-text">{v.sku}</span>
+                              <span className="text-xs font-mono text-[#A1A1A6]">{v.sku}</span>
                               <span
                                 className={cn(
                                   "text-xs font-bold px-3 py-1 rounded-full border transition-all duration-200 group-hover:scale-105",
@@ -188,7 +186,7 @@ export default function InventarioPage() {
                               >
                                 {v.stock_disponible}
                               </span>
-                              <span className="text-[10px] text-secondary-text">R:{v.stock_reservado}</span>
+                              <span className="text-[10px] text-[#A1A1A6]">R:{v.stock_reservado}</span>
                             </div>
                           ) : (
                             <span className="text-xs text-[#4A4A4A]">—</span>
@@ -202,26 +200,31 @@ export default function InventarioPage() {
             </table>
           </div>
           {filtered.length < variantes.length && (
-            <p className="mt-3 text-xs text-secondary-text text-center">
+            <p className="mt-3 text-[10px] text-[#A1A1A6] text-center">
               Mostrando {filtered.length} de {variantes.length} variantes
             </p>
           )}
-        </div>
+        </Card>
       )}
     </div>
   );
 }
 
 function StatCard({ title, value, icon: Icon, color }: { title: string; value: number; icon: React.ElementType; color: "success" | "warning" | "critical" }) {
+  const colorMap = {
+    success: "bg-[#30D158]/15 border border-[#30D158]/30 text-[#30D158]",
+    warning: "bg-[#FF9F0A]/15 border border-[#FF9F0A]/30 text-[#FF9F0A]",
+    critical: "bg-[#FF453A]/15 border border-[#FF453A]/30 text-[#FF453A]",
+  };
   return (
-    <Card padding="sm" className="border border-border/50 hover:border-border transition-colors">
+    <Card padding="sm" className="border border-[#2C2C2E]/30 hover:border-[#2C2C2E]/50 transition-colors">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-secondary-text uppercase tracking-wider">{title}</p>
-          <p className="text-2xl font-bold text-primary-text mt-1">{value}</p>
+          <p className="text-[10px] text-[#A1A1A6] uppercase tracking-widest">{title}</p>
+          <p className="text-2xl font-bold text-[#FFFFFF] mt-1">{value}</p>
         </div>
-        <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] flex items-center justify-center border border-border/50">
-          <Icon className="w-4 h-4 text-secondary-text" />
+        <div className="w-8 h-8 rounded-lg bg-[#161618]/50 flex items-center justify-center border border-[#2C2C2E]/30">
+          <Icon className="w-4 h-4 text-[#A1A1A6]" />
         </div>
       </div>
     </Card>

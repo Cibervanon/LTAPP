@@ -9,18 +9,21 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "#121212",
-        card: "#1E1E1E",
-        "primary-text": "#FFFFFF",
-        "secondary-text": "#8E8E93",
-        border: "#3A3A3C",
+        bg: "#0A0A0A",
+        surface: "#161618",
+        border: "#2C2C2E",
+        "text-primary": "#FFFFFF",
+        "text-secondary": "#A1A1A6",
         success: "#30D158",
         warning: "#FF9F0A",
         critical: "#FF453A",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        display: ["Inter", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
+      },
+      letterSpacing: {
+        tight: "-0.02em",
+        tighter: "-0.03em",
       },
     },
   },
